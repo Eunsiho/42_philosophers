@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hogkim <hogkim@student.42seoul.kr>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/07/27 08:59:35 by hogkim            #+#    #+#             */
+/*   Updated: 2022/07/27 08:59:37 by hogkim           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PHILO_H
 # define PHILO_H
 
@@ -10,13 +22,10 @@
 # define TRUE		1
 # define FALSE		0
 
-# define ALIVE		1
-# define DEAD		0
-
 # define KILL_PROCESS	1
 # define KEEP_PROCESS	0
 
-typedef struct s_philo t_philo;
+typedef struct s_philo	t_philo;
 
 typedef struct s_rule
 {
@@ -34,8 +43,9 @@ typedef struct s_param
 	long long		start_time;
 	struct s_rule	*rule;
 	pthread_mutex_t	*forks;
-	pthread_mutex_t dead_check; // ??
-	pthread_mutex_t print_lock;
+	pthread_mutex_t	print_lock;
+	pthread_mutex_t	is_dining_lock;
+	pthread_mutex_t	get_time_lock;
 	pthread_t		*tids;
 	t_philo			*philo;
 }	t_param;
@@ -44,33 +54,38 @@ typedef struct s_philo
 {
 	struct s_param	*param;
 	int				tid_index;
-	int				life; //
 	int				eat_count;
-	long long		start_starving_time; 
+	long long		start_starving_time;
 	pthread_mutex_t	*left_fork;
 	pthread_mutex_t	*right_fork;
 }	t_philo;
 
 /* ft_atoi.c */
-int	ft_is_digit(int c);
-int	ft_atoi(const char *str);
+int			ft_is_digit(int c);
+int			ft_atoi(const char *str);
 
 /* get_time.c */
-long long	get_time(void);
+long long	get_time(t_param *param);
 
 /* init_func.c */
-int	init_param(t_param *param, t_rule *rule);
+int			init_param(t_param *param, t_rule *rule);
 
 /* monitoring.c */
-int	monitoring_philos(t_param *param);
+int			monitoring_philos(t_param *param);
 
 /* parsing.c */
-int	parsing(int argc, char **argv, t_rule *rule);
+int			parsing(int argc, char **argv, t_rule *rule);
 
-/* philo_act */
-int	philo_run(t_rule *rule);
+/* philo_act.c */
+int			philo_run(t_rule *rule);
+
+/* philo_act2.c */
+void		spending_time(t_param *param, long long time_to_spend);
+void		philo_eat(t_rule *rule, t_philo *philo, int tid);
+void		philo_sleep(t_rule *rule, t_philo *philo, int tid);
+void		philo_think(t_rule *rule, t_philo *philo, int tid);
 
 /* print.c */
-void    print_terminal(t_param *param, int tid, char *str);
+void		print_terminal(t_param *param, int tid, char *str);
 
 #endif

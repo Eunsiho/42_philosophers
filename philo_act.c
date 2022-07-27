@@ -1,48 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo_act.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hogkim <hogkim@student.42seoul.kr>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/07/27 08:59:52 by hogkim            #+#    #+#             */
+/*   Updated: 2022/07/27 08:59:53 by hogkim           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
-#include <pthread.h>
 #include <unistd.h>
-#include <stdio.h> ///+++++++++++++++++++++++++++++++++++++++
-#include <stdlib.h>
 
-static void	busy_waiting(long long time_to_spend, t_philo *philo, int tid)
+static void	dining_philo_eat(t_philo *philo, int tid)
 {
-	long long	target_time;
-
-	target_time = get_time() + time_to_spend; 
-	while (get_time() < target_time)
-		usleep(100);
-}
-
-static void	philo_eat(t_rule *rule, t_philo *philo, int tid)
-{
-	if (rule->is_dining == FALSE)
-		return ;
-	print_terminal(philo->param, tid + 1, "is eating");
-	busy_waiting(rule->time_to_eat, philo, tid);
-	++(philo->eat_count);
-}
-
-static void	philo_sleep(t_rule *rule, t_philo *philo, int tid)
-{
-	if (rule->is_dining == FALSE)
-		return ;
-	print_terminal(philo->param, tid + 1, "is sleeping");
-	busy_waiting(rule->time_to_sleep, philo, tid);
-}
-
-static void	philo_think(t_rule *rule, t_philo *philo, int tid)
-{
-	if (rule->is_dining == FALSE)
-		return ;
-	print_terminal(philo->param, tid + 1, "is thinking");
-	usleep(50);
-}
-
-static void	odd_philo_eat(t_philo *philo, int tid)
-{
-	long long	start_time;
-
-	start_time = get_time();
 	pthread_mutex_lock(philo->left_fork);
 	print_terminal(philo->param, tid + 1, "has taken a fork");
 	pthread_mutex_lock(philo->right_fork);
@@ -52,35 +24,21 @@ static void	odd_philo_eat(t_philo *philo, int tid)
 	pthread_mutex_unlock(philo->right_fork);
 }
 
-static void	even_philo_eat(t_philo *philo, int tid)
-{
-	long long	start_time;
-
-	usleep(50);
-	start_time = get_time();
-	pthread_mutex_lock(philo->right_fork);
-	print_terminal(philo->param, tid + 1, "has taken a fork");
-	pthread_mutex_lock(philo->left_fork);
-	print_terminal(philo->param, tid + 1, "has taken a fork");
-	philo_eat(philo->param->rule, philo, philo->tid_index);
-	pthread_mutex_unlock(philo->left_fork);
-	pthread_mutex_unlock(philo->right_fork);
-}
-
-void	*philo_act(void *data)
+static void	*philo_act(void *data)
 {
 	int		tid;
 	t_philo	*philo;
 
 	philo = (t_philo *)data;
 	tid = philo->tid_index;
+	if (tid % 2 == 1)
+	{
+		philo->start_starving_time = get_time(philo->param);
+		usleep(philo->param->rule->time_to_eat * 800);
+	}
 	while (philo->param->rule->is_dining == TRUE)
 	{
-		if (tid % 2 == 0)
-			odd_philo_eat(philo, tid);
-		else
-			even_philo_eat(philo, tid);
-		philo->start_starving_time = get_time();
+		dining_philo_eat(philo, tid);
 		philo_sleep(philo->param->rule, philo, philo->tid_index);
 		philo_think(philo->param->rule, philo, philo->tid_index);
 	}
@@ -95,22 +53,21 @@ int	philo_run(t_rule *rule)
 	if (init_param(&param, rule) == FAIL)
 		return (FAIL);
 	i = 0;
+	param.start_time = get_time(&param);
 	while (i < rule->num_of_philo)
 	{
 		param.philo[i].tid_index = i;
-		if (i == 0)
-			param.start_time = get_time();
 		pthread_create(&param.tids[i], NULL, philo_act, &param.philo[i]);
 		++i;
 	}
-	if (monitoring_philos(&param) == KILL_PROCESS)
+	if (monitoring_philos(&param) == KILL_PROCESS && rule->num_of_philo != 1)
 	{
 		i = 0;
 		while (i < rule->num_of_philo)
 		{
-			pthread_detach(param.tids[i]);
+			pthread_join(param.tids[i], NULL);
 			++i;
 		}
 	}
-	return (SUCCESS); //반환할 일이 없음.
+	return (SUCCESS);
 }

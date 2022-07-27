@@ -1,5 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init_func.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hogkim <hogkim@student.42seoul.kr>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/07/27 09:00:14 by hogkim            #+#    #+#             */
+/*   Updated: 2022/07/27 09:00:14 by hogkim           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
-#include <pthread.h>
 #include <stdlib.h>
 
 static void	destroy_mutex(int i, t_param *param)
@@ -26,16 +37,15 @@ static int	init_philo(t_param *param)
 	while (i < param->rule->num_of_philo)
 	{
 		param->philo[i].param = param;
-		param->philo[i].life = ALIVE;
 		param->philo[i].eat_count = 0;
-		param->philo[i].start_starving_time = get_time();
+		param->philo[i].start_starving_time = get_time(param);
 		param->philo[i].left_fork = &param->forks[i];
-		param->philo[i].right_fork = &param->forks[(i + 1) % param->rule->num_of_philo];
+		param->philo[i].right_fork = &param->forks[(i + 1) \
+			% param->rule->num_of_philo];
 		++i;
 	}
 	return (SUCCESS);
 }
-
 
 int	init_param(t_param *param, t_rule *rule)
 {
@@ -43,8 +53,9 @@ int	init_param(t_param *param, t_rule *rule)
 
 	param->rule = rule;
 	param->forks = malloc(sizeof(pthread_mutex_t) * rule->num_of_philo);
-	pthread_mutex_init(&param->dead_check, NULL);
 	pthread_mutex_init(&param->print_lock, NULL);
+	pthread_mutex_init(&param->is_dining_lock, NULL);
+	pthread_mutex_init(&param->get_time_lock, NULL);
 	if (!param->forks)
 		return (FAIL);
 	i = 0;

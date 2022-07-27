@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: hogkim <hogkim@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/11/25 13:33:37 by surlee            #+#    #+#             */
-/*   Updated: 2022/07/15 10:29:34 by hogkim           ###   ########.fr       */
+/*   Created: 2022/07/27 09:00:21 by hogkim            #+#    #+#             */
+/*   Updated: 2022/07/27 09:00:21 by hogkim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,6 @@ int	ft_atoi(const char *str)
 	i = 0;
 	if (str[i] == '+')
 		++i;
-	/*i = (*str == '+' || *str == '-')
-	sign = 1 - ((str[i] == '-') << 1);
-	이렇게 두 줄로 줄일 수도 있음!*/
 	result = 0;
 	while (ft_is_digit(str[i]))
 		result = result * 10 + (str[i++] - '0');

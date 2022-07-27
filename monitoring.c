@@ -1,8 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   monitoring.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hogkim <hogkim@student.42seoul.kr>         +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/07/27 09:00:01 by hogkim            #+#    #+#             */
+/*   Updated: 2022/07/27 09:00:01 by hogkim           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 #include <unistd.h>
 #include <stdio.h>
 
-int	check_eat_count(t_param *param)
+static int	check_eat_count(t_param *param)
 {
 	int	i;
 	int	num_of_hogs;
@@ -17,25 +29,32 @@ int	check_eat_count(t_param *param)
 	}
 	if (num_of_hogs == param->rule->num_of_philo)
 	{
+		pthread_mutex_lock(&param->is_dining_lock);
 		param->rule->is_dining = FALSE;
+		pthread_mutex_unlock(&param->is_dining_lock);
+		pthread_mutex_lock(&param->print_lock);
 		printf("all philosophers have became hogs\n");
 		return (KILL_PROCESS);
 	}
 	return (KEEP_PROCESS);
 }
 
-int	check_death_of_philo(t_param *param)
+static int	check_death_of_philo(t_param *param)
 {
 	int	i;
 
 	i = 0;
 	while (i < param->rule->num_of_philo)
 	{
-		if ((get_time() - param->philo[i].start_starving_time > param->rule->time_to_die))
+		if ((get_time(param) - param->philo[i].start_starving_time \
+			> param->rule->time_to_die))
 		{
-			printf("%d : %lld\n", i + 1, get_time() - param->philo[i].start_starving_time);
+			pthread_mutex_lock(&param->is_dining_lock);
 			param->rule->is_dining = FALSE;
-			print_terminal(param, i + 1, "died");
+			pthread_mutex_unlock(&param->is_dining_lock);
+			pthread_mutex_lock(&param->print_lock);
+			printf("[%lld] %d %s\n", get_time(param) \
+				- param->start_time, i + 1, "died");
 			return (KILL_PROCESS);
 		}
 		++i;
@@ -47,16 +66,11 @@ int	monitoring_philos(t_param *param)
 {
 	while (1)
 	{
-		// pthread_mutex_lock(&param->dead_check);
 		if (check_death_of_philo(param) == KILL_PROCESS)
-		{
-			pthread_mutex_unlock(&param->dead_check);
-			break;
-		}
-		// pthread_mutex_unlock(&param->dead_check);
+			break ;
 		if (param->rule->if_count_of_must_eat == TRUE && \
 			check_eat_count(param) == KILL_PROCESS)
-			break;
+			break ;
 	}
 	return (KILL_PROCESS);
 }
