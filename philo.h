@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: hogkim <hogkim@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/07/27 08:59:35 by hogkim            #+#    #+#             */
-/*   Updated: 2022/07/27 08:59:37 by hogkim           ###   ########.fr       */
+/*   Created: 2022/08/01 08:23:42 by hogkim            #+#    #+#             */
+/*   Updated: 2022/08/01 08:23:42 by hogkim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ int			monitoring_philos(t_param *param);
 int			parsing(int argc, char **argv, t_rule *rule);
 
 /* philo_act.c */
-int			philo_run(t_rule *rule);
+void		philo_run(t_rule *rule);
 
 /* philo_act2.c */
 void		spending_time(t_param *param, long long time_to_spend);
