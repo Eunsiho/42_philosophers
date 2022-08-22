@@ -6,12 +6,12 @@
 #    By: hogkim <hogkim@student.42seoul.kr>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/01 08:23:24 by hogkim            #+#    #+#              #
-#    Updated: 2022/08/01 08:23:24 by hogkim           ###   ########.fr        #
+#    Updated: 2022/08/22 19:25:53 by hogkim           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = cc
-CFLAGS = -Werror -Wall -Wextra
+CFLAGS = -Werror -Wall -Wextra -g3 -fsanitize=thread
 NAME = philo
 
 SRCS = main.c \
@@ -28,7 +28,7 @@ OBJS = $(SRCS:.c=.o)
 all : $(NAME)
 
 $(NAME) : $(OBJS)
-	$(CC) $(CFLAGS) -pthread -fsanitize=thread -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^
 
 clean :
 	rm -f $(OBJS)

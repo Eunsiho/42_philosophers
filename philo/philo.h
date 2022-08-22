@@ -6,7 +6,7 @@
 /*   By: hogkim <hogkim@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/01 08:23:42 by hogkim            #+#    #+#             */
-/*   Updated: 2022/08/01 08:23:42 by hogkim           ###   ########.fr       */
+/*   Updated: 2022/08/22 19:26:26 by hogkim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,11 @@
 # define KILL_PROCESS	1
 # define KEEP_PROCESS	0
 
+typedef struct s_rule	t_rule;
+typedef struct s_param	t_param;
 typedef struct s_philo	t_philo;
 
-typedef struct s_rule
+struct s_rule
 {
 	int	num_of_philo;
 	int	time_to_die;
@@ -36,9 +38,9 @@ typedef struct s_rule
 	int	count_of_must_eat;
 	int	if_count_of_must_eat;
 	int	is_dining;
-}	t_rule;
+};
 
-typedef struct s_param
+struct s_param
 {
 	long long		start_time;
 	struct s_rule	*rule;
@@ -48,9 +50,9 @@ typedef struct s_param
 	pthread_mutex_t	get_time_lock;
 	pthread_t		*tids;
 	t_philo			*philo;
-}	t_param;
+};
 
-typedef struct s_philo
+struct s_philo
 {
 	struct s_param	*param;
 	int				tid_index;
@@ -58,7 +60,7 @@ typedef struct s_philo
 	long long		start_starving_time;
 	pthread_mutex_t	*left_fork;
 	pthread_mutex_t	*right_fork;
-}	t_philo;
+};
 
 /* ft_atoi.c */
 int			ft_is_digit(int c);

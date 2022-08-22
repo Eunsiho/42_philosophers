@@ -6,24 +6,60 @@
 /*   By: hogkim <hogkim@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/08/01 08:23:10 by hogkim            #+#    #+#             */
-/*   Updated: 2022/08/01 08:23:16 by hogkim           ###   ########.fr       */
+/*   Updated: 2022/08/22 19:18:50 by hogkim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 #include <stdlib.h>
 
-static void	destroy_mutex(int i, t_param *param)
+static void	destroy_mutex(int i, t_param *param, int step)
 {
 	int	start;
 
-	start = 0;
-	while (start <= i)
+	if (step >= 1)
+		pthread_mutex_destroy(&param->print_lock);
+	if (step >= 2)
+		pthread_mutex_destroy(&param->is_dining_lock);
+	if (step >= 3)
 	{
-		pthread_mutex_destroy(&param->forks[start]);
-		++start;
+		pthread_mutex_destroy(&param->get_time_lock);
+		start = 0;
+		while (start <= i)
+		{
+			pthread_mutex_destroy(&param->forks[start]);
+			++start;
+		}
 	}
-	free(param->forks);
+}
+
+static int	mutexes_init(t_param *param)
+{
+	int	i;
+
+	if (pthread_mutex_init(&param->print_lock, NULL))
+		return (FAIL);
+	if (pthread_mutex_init(&param->is_dining_lock, NULL))
+	{
+		destroy_mutex(0, param, 1);
+		return (FAIL);
+	}
+	if (pthread_mutex_init(&param->get_time_lock, NULL))
+	{
+		destroy_mutex(0, param, 2);
+		return (FAIL);
+	}
+	i = 0;
+	while (i < param->rule->num_of_philo)
+	{
+		if (pthread_mutex_init(&param->forks[i], NULL))
+		{
+			destroy_mutex(i, param, 3);
+			return (FAIL);
+		}
+		++i;
+	}
+	return (SUCCESS);
 }
 
 static int	init_philo(t_param *param)
@@ -49,28 +85,28 @@ static int	init_philo(t_param *param)
 
 int	init_param(t_param *param, t_rule *rule)
 {
-	int	i;
-
 	param->rule = rule;
 	param->forks = malloc(sizeof(pthread_mutex_t) * rule->num_of_philo);
-	pthread_mutex_init(&param->print_lock, NULL);
-	pthread_mutex_init(&param->is_dining_lock, NULL);
-	pthread_mutex_init(&param->get_time_lock, NULL);
 	if (!param->forks)
 		return (FAIL);
-	i = 0;
-	while (i < rule->num_of_philo)
+	if (mutexes_init(param) == FAIL)
 	{
-		if (pthread_mutex_init(&param->forks[i], NULL))
-		{
-			destroy_mutex(i, param);
-			return (FAIL);
-		}
-		++i;
+		free(param->forks);
+		return (FAIL);
 	}
 	param->tids = malloc(sizeof(pthread_t) * rule->num_of_philo);
 	if (!param->tids)
+	{
+		destroy_mutex(param->rule->num_of_philo, param, 3);
+		free(param->forks);
 		return (FAIL);
-	init_philo(param);
+	}
+	if (init_philo(param) == FAIL)
+	{
+		destroy_mutex(param->rule->num_of_philo, param, 3);
+		free(param->forks);
+		free(param->tids);
+		return (FAIL);
+	}
 	return (SUCCESS);
 }
