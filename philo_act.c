@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: hogkim <hogkim@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/08/01 08:23:35 by hogkim            #+#    #+#             */
-/*   Updated: 2022/08/22 19:29:12 by hogkim           ###   ########.fr       */
+/*   Created: 2022/08/24 17:18:28 by hogkim            #+#    #+#             */
+/*   Updated: 2022/08/24 17:20:17 by hogkim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,19 +54,21 @@ static void	*philo_act(void *data)
 	tid = philo->tid_index;
 	if (tid % 2 == 1)
 	{
+		pthread_mutex_lock(&philo->param->starving_time_lock);
 		philo->start_starving_time = get_time(philo->param);
+		pthread_mutex_unlock(&philo->param->starving_time_lock);
 		usleep(philo->param->rule->time_to_eat * 800);
 	}
-	while (1)
+	pthread_mutex_lock(&philo->param->is_dining_lock);
+	while (philo->param->rule->is_dining == TRUE)
 	{
-		pthread_mutex_lock(&philo->param->is_dining_lock);
-		if (philo->param->rule->is_dining == FAIL)
-			return (NULL);
 		pthread_mutex_unlock(&philo->param->is_dining_lock);
 		dining_philo_eat(philo, tid);
 		philo_sleep(philo->param->rule, philo, philo->tid_index);
 		philo_think(philo->param->rule, philo, philo->tid_index);
+		pthread_mutex_lock(&philo->param->is_dining_lock);
 	}
+	pthread_mutex_unlock(&philo->param->is_dining_lock);
 	return (NULL);
 }
 
@@ -85,7 +87,6 @@ void	philo_run(t_rule *rule)
 		if (pthread_create(&param.tids[i], NULL, philo_act, &param.philo[i]))
 		{
 			detach_pthreads(i, &param);
-			free_all(&param);
 			return ;
 		}
 		++i;

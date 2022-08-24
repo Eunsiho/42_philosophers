@@ -1,27 +1,36 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   print.c                                            :+:      :+:    :+:   */
+/*   ft_atoi.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: hogkim <hogkim@student.42seoul.kr>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/08/01 08:23:46 by hogkim            #+#    #+#             */
-/*   Updated: 2022/08/22 19:29:12 by hogkim           ###   ########.fr       */
+/*   Created: 2022/08/24 17:19:11 by hogkim            #+#    #+#             */
+/*   Updated: 2022/08/24 17:19:12 by hogkim           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
-#include <stdio.h>
 
-void	print_terminal(t_param *param, int tid, char *str)
+int	ft_is_digit(int c)
 {
-	pthread_mutex_lock(&param->is_dining_lock);
-	if (param->rule->is_dining == TRUE)
-	{
-		pthread_mutex_lock(&param->print_lock);
-		printf("[%lld] %d %s\n", get_time(param) - param->start_time, tid, str);
-		pthread_mutex_unlock(&param->print_lock);
-		pthread_mutex_unlock(&param->is_dining_lock);
-	}
-	pthread_mutex_unlock(&param->is_dining_lock);
+	if (c >= '0' && c <= '9')
+		return (1);
+	return (0);
+}
+
+int	ft_atoi(const char *str)
+{
+	int		i;
+	long	result;
+
+	i = 0;
+	if (str[i] == '+')
+		++i;
+	result = 0;
+	while (ft_is_digit(str[i]))
+		result = result * 10 + (str[i++] - '0');
+	if (result < -2147483648 || result > 2147483647)
+		return (FAIL);
+	return ((int)(result));
 }

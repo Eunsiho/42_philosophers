@@ -5,13 +5,13 @@
 #                                                     +:+ +:+         +:+      #
 #    By: hogkim <hogkim@student.42seoul.kr>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2022/08/01 08:23:24 by hogkim            #+#    #+#              #
-#    Updated: 2022/08/22 19:25:53 by hogkim           ###   ########.fr        #
+#    Created: 2022/08/24 17:18:46 by hogkim            #+#    #+#              #
+#    Updated: 2022/08/24 17:18:46 by hogkim           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = cc
-CFLAGS = -Werror -Wall -Wextra -g3 -fsanitize=thread
+CFLAGS = -Werror -Wall -Wextra
 NAME = philo
 
 SRCS = main.c \
